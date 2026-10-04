@@ -99,6 +99,21 @@ int main(void)
   GPIOC->MODER |= (1<<16);
   GPIOC->OTYPER &= ~(1<<8);
   GPIOC->OSPEEDR |= (3 << 16);
+
+  RCC->AHB1ENR |= (1 << 0);
+  GPIOA->MODER |= (1<<16);
+  GPIOA->OTYPER &= ~(1<<8);
+  GPIOA->OSPEEDR |= (3 << 16);
+
+  GPIOA->MODER |= (1<<30);
+  GPIOA->OTYPER &= ~(1<<15);
+  GPIOA->OSPEEDR |= (3 << 30);
+
+  RCC->AHB1ENR |= (1 << 1);
+  GPIOB->MODER |= (1<<12);
+  GPIOB->OTYPER &= ~(1<<6);
+  GPIOB->OSPEEDR |= (3 << 12);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -115,6 +130,15 @@ int main(void)
 	  GPIOC->BSRR |= (1 << 29);
 	  GPIOC->BSRR |= (1 << 16);
 	  GPIOC->BSRR |= (1 << 24);
+	  HAL_Delay(1000);
+
+    GPIOA->BSRR |= (1 << 8);
+	  GPIOA->BSRR |= (1 << 15);
+	  GPIOB->BSRR |= (1 << 6);
+	  HAL_Delay(1000);
+	  GPIOA->BSRR |= (1 << 24);
+	  GPIOA->BSRR |= (1 << 31);
+	  GPIOB->BSRR |= (1 << 22);
 	  HAL_Delay(1000);
 
 
