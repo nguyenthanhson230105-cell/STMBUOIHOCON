@@ -88,31 +88,34 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
   RCC->AHB1ENR |= (1 << 2);
-  GPIOC->MODER |= (1<<26);
-  GPIOC->OTYPER &= ~(1<<13);
+  GPIOC->MODER |= (1 << 26);
+  GPIOC->MODER |= (1 << 30);
+  GPIOC->OTYPER &= ~(1 << 13);
+  GPIOC->OTYPER &= ~(1 << 15);
   GPIOC->OSPEEDR |= (3 << 26);
-
-  GPIOC->MODER |= (1<<0);
-  GPIOC->OTYPER &= ~(1<<0);
-  GPIOC->OSPEEDR |= (3 << 0);
-
-  GPIOC->MODER |= (1<<16);
-  GPIOC->OTYPER &= ~(1<<8);
-  GPIOC->OSPEEDR |= (3 << 16);
-
-  RCC->AHB1ENR |= (1 << 0);
-  GPIOA->MODER |= (1<<16);
-  GPIOA->OTYPER &= ~(1<<8);
-  GPIOA->OSPEEDR |= (3 << 16);
-
-  GPIOA->MODER |= (1<<30);
-  GPIOA->OTYPER &= ~(1<<15);
-  GPIOA->OSPEEDR |= (3 << 30);
-
+  GPIOC->OSPEEDR |= (3 << 30);
+  
   RCC->AHB1ENR |= (1 << 1);
-  GPIOB->MODER |= (1<<12);
-  GPIOB->OTYPER &= ~(1<<6);
-  GPIOB->OSPEEDR |= (3 << 12);
+  GPIOB->MODER &= ~(1 << 2);
+  GPIOB->MODER &= ~(1 << 4);
+  GPIOB->PUPDR |= (1 << 2);
+  GPIOB->PUPDR |= (1 << 4);
+  GPIOB->OSPEEDR |= (3 << 2);
+  GPIOB->OSPEEDR |= (3 << 4);
+
+  RCC->APB2ENR |= (1 << 14);
+  SYSCFG->EXTICR[0] |= (1 << 4);
+  SYSCFG->EXTICR[0] |= (1 << 8);
+  EXTI->IMR |= (1 << 1);
+  EXTI->IMR |= (1 << 2);
+  EXTI->FTSR |= (1 << 1);
+  EXTI->FTSR |= (1 << 2);
+  EXTI->RTSR &= ~(1 << 1);
+  EXTI->RTSR &= ~(1 << 2);
+  NVIC->ISER[0] |= (1 << 7);
+  NVIC->ISER[0] |= (1 << 8);
+
+
 
   /* USER CODE END 2 */
 
@@ -120,27 +123,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  GPIOC->BSRR |= (1 << 13);
-	  GPIOC->BSRR |= (1 << 0);
-	  GPIOC->BSRR |= (1 << 8);
-	  HAL_Delay(1000);
-	  GPIOC->BSRR |= (1 << 29);
-	  GPIOC->BSRR |= (1 << 16);
-	  GPIOC->BSRR |= (1 << 24);
-	  HAL_Delay(1000);
-
-    GPIOA->BSRR |= (1 << 8);
-	  GPIOA->BSRR |= (1 << 15);
-	  GPIOB->BSRR |= (1 << 6);
-	  HAL_Delay(1000);
-	  GPIOA->BSRR |= (1 << 24);
-	  GPIOA->BSRR |= (1 << 31);
-	  GPIOB->BSRR |= (1 << 22);
-	  HAL_Delay(1000);
-
+	  
 
   }
   /* USER CODE END 3 */
@@ -206,7 +193,22 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+  void EXTI1_IRQHandler(void)
+  {
+    if(EXTI->PR & (1 << 1))
+    {
+      GPIOC->ODR ^= (1 << 15);
+      EXTI->PR |= (1 << 1);
+    }
+  }
+  void EXTI2_IRQHandler(void)
+  {
+    if(EXTI->PR & (1 << 2))
+    {
+      GPIOC->ODR ^= (1 << 13);
+      EXTI->PR |= (1 << 2);
+    }
+  }
 /* USER CODE END 4 */
 
 /**
