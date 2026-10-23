@@ -49,11 +49,13 @@
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
-
+void Seg7_Print(uint8_t num);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+unsigned char seg_code[10]={0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90};
+int count = 0;
 
 /* USER CODE END 0 */
 
@@ -88,12 +90,9 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
   RCC->AHB1ENR |= (1 << 2);
-  GPIOC->MODER |= (1 << 26);
-  GPIOC->MODER |= (1 << 30);
-  GPIOC->OTYPER &= ~(1 << 13);
-  GPIOC->OTYPER &= ~(1 << 15);
-  GPIOC->OSPEEDR |= (3 << 26);
-  GPIOC->OSPEEDR |= (3 << 30);
+  GPIOC->MODER |= (1 << 0) | (1 << 2) | (1 << 4) | (1 << 6) | (1 << 8) | (1 << 10) | (1 << 12);
+  GPIOC->OTYPER &= ~((1 << 0) | (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) );
+  GPIOC->OSPEEDR |= (3 << 0) | (3 << 2) | (3 << 4) | (3 << 6) | (3 << 8) | (3 << 10) | (3 << 12);
   
   RCC->AHB1ENR |= (1 << 1);
   GPIOB->MODER &= ~(1 << 2);
@@ -116,7 +115,7 @@ int main(void)
   NVIC->ISER[0] |= (1 << 8);
 
 
-
+  Seg7_Print(0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -127,7 +126,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  
+
+
+		  Seg7_Print(count);
+		  HAL_Delay(100);
+
 
   }
   /* USER CODE END 3 */
@@ -197,17 +200,39 @@ static void MX_GPIO_Init(void)
   {
     if(EXTI->PR & (1 << 1))
     {
+    	count++;
+    	if (count == 10 )
+    		{
+    		count = 9;
+    		}
       GPIOC->ODR ^= (1 << 15);
       EXTI->PR |= (1 << 1);
     }
+
   }
   void EXTI2_IRQHandler(void)
   {
     if(EXTI->PR & (1 << 2))
     {
+    	count--;
+    	if (count <= 0 )
+    	    		{
+    	    		count = 0;
+    	    		}
       GPIOC->ODR ^= (1 << 13);
       EXTI->PR |= (1 << 2);
     }
+  }
+
+  void Seg7_Print(uint8_t num)
+  {
+      uint8_t code = seg_code[num];
+
+      // Clear 7 bit (PC0..PC6)
+      GPIOC->ODR &= ~((1 << 0) | (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) );
+
+      // Ghi mã segment
+      GPIOC->ODR |= (code & 0x7F); // AND 1 giá trị để ghi vào thanh ghi 7 đoạn
   }
 /* USER CODE END 4 */
 
