@@ -50,12 +50,14 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 void Seg7_Print(uint8_t num);
+void Seg7_Print_2(uint8_t num);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 unsigned char seg_code[10]={0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90};
 int count = 0;
+int i=40;
 
 /* USER CODE END 0 */
 
@@ -90,9 +92,11 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
   RCC->AHB1ENR |= (1 << 2);
-  GPIOC->MODER |= (1 << 0) | (1 << 2) | (1 << 4) | (1 << 6) | (1 << 8) | (1 << 10) | (1 << 12);
-  GPIOC->OTYPER &= ~((1 << 0) | (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) );
-  GPIOC->OSPEEDR |= (3 << 0) | (3 << 2) | (3 << 4) | (3 << 6) | (3 << 8) | (3 << 10) | (3 << 12);
+  GPIOC->MODER |= (1 << 0) | (1 << 2) | (1 << 4) | (1 << 6) | (1 << 8) | (1 << 10) | (1 << 12) | (1 << 14) | (1 << 16) | (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 26) | (1 << 28) | (1 << 30) ;
+  GPIOC->OTYPER &= ~((1 << 0) | (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) ) | (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15) ;
+  GPIOC->OSPEEDR |= (3 << 0) | (3 << 2) | (3 << 4) | (3 << 6) | (3 << 8) | (3 << 10) | (3 << 12) | (3 << 14) | (3 << 16) | (3 << 18) | (3 << 20) | (3 << 22) | (3 << 24) | (3 << 26) | (3 << 28) | (3 << 30);
+
+
   
   RCC->AHB1ENR |= (1 << 1);
   GPIOB->MODER &= ~(1 << 2);
@@ -116,6 +120,7 @@ int main(void)
 
 
   Seg7_Print(0);
+  Seg7_Print_2(0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -126,10 +131,22 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  Seg7_Print_2(i);
+	  if (i==30)
+	  {
+		  GPIOC->BSRR |= (1<<14);
+	  }
+	  else if (i==60)
+	  {
+		  GPIOC->BSRR |= (1<<15);
+	  }
+	  else
+	  {
+		  GPIOC->BSRR |= (1<<30);
+		  GPIOC->BSRR |= (1<<31);
+	  }
 
 
-		  Seg7_Print(count);
-		  HAL_Delay(100);
 
 
   }
@@ -200,10 +217,10 @@ static void MX_GPIO_Init(void)
   {
     if(EXTI->PR & (1 << 1))
     {
-    	count++;
-    	if (count == 10 )
+    	i++;
+    	if (i == 100 )
     		{
-    		count = 9;
+    		i = 99;
     		}
       GPIOC->ODR ^= (1 << 15);
       EXTI->PR |= (1 << 1);
@@ -214,10 +231,10 @@ static void MX_GPIO_Init(void)
   {
     if(EXTI->PR & (1 << 2))
     {
-    	count--;
-    	if (count <= 0 )
+    	i--;
+    	if (i <= 0 )
     	    		{
-    	    		count = 0;
+    	    		i = 0;
     	    		}
       GPIOC->ODR ^= (1 << 13);
       EXTI->PR |= (1 << 2);
@@ -234,6 +251,17 @@ static void MX_GPIO_Init(void)
       // Ghi mã segment
       GPIOC->ODR |= (code & 0x7F); // AND 1 giá trị để ghi vào thanh ghi 7 đoạn
   }
+
+  void Seg7_Print_2(uint8_t num)
+  {
+      if (num > 99) num = 99;
+      uint8_t ten  = seg_code[num / 10];   // hàng chục   -> PC0..PC6
+      uint8_t unit = seg_code[num % 10];   // hàng đơn vị -> PC7..PC13
+
+      uint32_t out = (ten & 0x7F) | ((uint32_t)(unit & 0x7F) << 7);
+      GPIOC->ODR = (GPIOC->ODR & ~0x3FFFu) | out;   // ghi 1 lần cả 14 chân
+  }
+
 /* USER CODE END 4 */
 
 /**
