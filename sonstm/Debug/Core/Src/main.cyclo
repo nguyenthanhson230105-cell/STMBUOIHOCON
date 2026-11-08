@@ -1,8 +1,9 @@
-../Core/Src/main.c:68:5:main	3
-../Core/Src/main.c:160:6:SystemClock_Config	3
-../Core/Src/main.c:202:13:MX_GPIO_Init	1
-../Core/Src/main.c:216:8:EXTI1_IRQHandler	3
-../Core/Src/main.c:230:8:EXTI2_IRQHandler	3
-../Core/Src/main.c:244:8:Seg7_Print	1
-../Core/Src/main.c:255:8:Seg7_Print_2	2
-../Core/Src/main.c:271:6:Error_Handler	1
+../Core/Src/main.c:69:5:main	5
+../Core/Src/main.c:176:6:SystemClock_Config	3
+../Core/Src/main.c:218:13:MX_GPIO_Init	1
+../Core/Src/main.c:232:8:EXTI1_IRQHandler	3
+../Core/Src/main.c:246:8:EXTI2_IRQHandler	3
+../Core/Src/main.c:260:8:Seg7_Print	1
+../Core/Src/main.c:271:8:Seg7_Print_2	2
+../Core/Src/main.c:281:11:UART2_GetChar	2
+../Core/Src/main.c:294:6:Error_Handler	1

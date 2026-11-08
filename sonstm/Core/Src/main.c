@@ -51,6 +51,7 @@ static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 void Seg7_Print(uint8_t num);
 void Seg7_Print_2(uint8_t num);
+uint8_t UART2_GetChar(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -58,7 +59,7 @@ void Seg7_Print_2(uint8_t num);
 unsigned char seg_code[10]={0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90};
 int count = 0;
 int i=40;
-
+uint8_t data;
 /* USER CODE END 0 */
 
 /**
@@ -96,6 +97,17 @@ int main(void)
   GPIOC->OTYPER &= ~((1 << 0) | (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | (1 << 6) ) | (1 << 7) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15) ;
   GPIOC->OSPEEDR |= (3 << 0) | (3 << 2) | (3 << 4) | (3 << 6) | (3 << 8) | (3 << 10) | (3 << 12) | (3 << 14) | (3 << 16) | (3 << 18) | (3 << 20) | (3 << 22) | (3 << 24) | (3 << 26) | (3 << 28) | (3 << 30);
 
+  RCC->AHB1ENR |= (1<<0);
+  RCC->APB1ENR |= (1<<17);
+  GPIOA->MODER |= (2<<4) | (2<<6);
+  GPIOA->OSPEEDR |= (3<<4) | (3<<6);
+  GPIOA->AFR[0] |= (7<<8) | (7<<12);
+  USART2->CR1 = 0x00;
+  USART2->CR1 |= (1<<13);
+  USART2->CR1 &= ~(1<<12);
+  USART2->BRR |= (1<<0) | (26<<4);
+  USART2->CR1 |= (1<<2) | (1<<3);
+
 
   
   RCC->AHB1ENR |= (1 << 1);
@@ -131,20 +143,24 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  Seg7_Print_2(i);
-	  if (i==30)
-	  {
+	  data = UART2_GetChar();
+	  if (data == '1') {
 		  GPIOC->BSRR |= (1<<14);
 	  }
-	  else if (i==60)
-	  {
+	  else if (data == '0') {
+		  GPIOC->BSRR |= (1<<30);
+	  }
+	  else if (data == 's') {
 		  GPIOC->BSRR |= (1<<15);
 	  }
-	  else
-	  {
+	  else if (data == 'd') {
+		  GPIOC->BSRR |= (1<<31);
+	  }
+	  else {
 		  GPIOC->BSRR |= (1<<30);
 		  GPIOC->BSRR |= (1<<31);
 	  }
+
 
 
 
@@ -260,6 +276,13 @@ static void MX_GPIO_Init(void)
 
       uint32_t out = (ten & 0x7F) | ((uint32_t)(unit & 0x7F) << 7);
       GPIOC->ODR = (GPIOC->ODR & ~0x3FFFu) | out;   // ghi 1 lần cả 14 chân
+  }
+
+  uint8_t UART2_GetChar(void){
+  	uint8_t temp;
+  	while(!(USART2->SR&(1<<5))); // wait for RXNE bit to set
+  	temp = USART2->DR; // Read the data . This clears the RXNE also
+  	return temp;
   }
 
 /* USER CODE END 4 */
