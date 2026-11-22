@@ -52,6 +52,9 @@ static void MX_GPIO_Init(void);
 void Seg7_Print(uint8_t num);
 void Seg7_Print_2(uint8_t num);
 uint8_t UART2_GetChar(void);
+uint8_t UART1_GetChar(void);
+void USART1_sendchar(uint8_t c);
+void UART1_SendString (char *string);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -60,6 +63,7 @@ unsigned char seg_code[10]={0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90};
 int count = 0;
 int i=40;
 uint8_t data;
+uint8_t data1;
 /* USER CODE END 0 */
 
 /**
@@ -108,6 +112,16 @@ int main(void)
   USART2->BRR |= (1<<0) | (26<<4);
   USART2->CR1 |= (1<<2) | (1<<3);
 
+  RCC->APB2ENR |= (1<<4);
+  GPIOA->MODER |= (2<<18) | (2<<20);
+  GPIOA->OSPEEDR |= (3<<18) | (3<<20);
+  GPIOA->AFR[1] |= (7<<4) | (7<<8);
+  USART1->CR1 = 0x00;
+  USART1->CR1 |= (1<<13);
+  USART1->CR1 &= ~(1<<12);
+  USART1->BRR |= (11<<0) | (8<<4);
+  USART1->CR1 |= (1<<2) | (1<<3);
+
 
   
   RCC->AHB1ENR |= (1 << 1);
@@ -143,23 +157,84 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  data = UART2_GetChar();
-	  if (data == '1') {
-		  GPIOC->BSRR |= (1<<14);
+//	  data = UART2_GetChar();
+//	  if (data == '1') {
+//		  GPIOC->BSRR |= (1<<14);
+//	  }
+//	  else if (data == '0') {
+//		  GPIOC->BSRR |= (1<<30);
+//	  }
+//	  else if (data == 's') {
+//		  GPIOC->BSRR |= (1<<15);
+//	  }
+//	  else if (data == 'd') {
+//		  GPIOC->BSRR |= (1<<31);
+//	  }
+//	  else {
+//		  GPIOC->BSRR |= (1<<30);
+//		  GPIOC->BSRR |= (1<<31);
+//	  }
+
+//	  data1 = UART1_GetChar();
+//	  	  if (data1 == '3') {
+//	  		  GPIOC->BSRR |= (1<<14);
+//	  		UART1_SendString ("toila3\n");
+//
+//	  	  }
+//	  	  else if (data1 == '4') {
+//	  		  GPIOC->BSRR |= (1<<30);
+//	  		UART1_SendString ("toila4\n");
+//	  	  }
+//	  	  else if (data1 == 'a') {
+//	  		  GPIOC->BSRR |= (1<<15);
+//	  		UART1_SendString ("toila a\n");
+//	  	  }
+//	  	  else if (data1 == 'w') {
+//	  		  GPIOC->BSRR |= (1<<31);
+//	  		UART1_SendString ("toila w\n");
+//	  	  }
+//	  	  else {
+//	  		  GPIOC->BSRR |= (1<<30);
+//	  		  GPIOC->BSRR |= (1<<31);
+//	  		UART1_SendString ("toikhonglaai\n");
+//	  	  }
+
+	  data1 = UART1_GetChar();
+	  if (data1 == '1') {
+		  Seg7_Print(1);
 	  }
-	  else if (data == '0') {
-		  GPIOC->BSRR |= (1<<30);
+	  else if (data1 == '2') {
+		  Seg7_Print(2);
 	  }
-	  else if (data == 's') {
-		  GPIOC->BSRR |= (1<<15);
-	  }
-	  else if (data == 'd') {
-		  GPIOC->BSRR |= (1<<31);
-	  }
+	  else if (data1 == '3') {
+	  		  Seg7_Print(3);
+	  	  }
+	  else if (data1 == '4') {
+	  		  Seg7_Print(4);
+	  	  }
+	  else if (data1 == '5') {
+	  		  Seg7_Print(5);
+	  	  }
+	  else if (data1 == '6') {
+	  		  Seg7_Print(6);
+	  	  }
+	  else if (data1 == '7') {
+	  		  Seg7_Print(7);
+	  	  }
+	  else if (data1 == '8') {
+	  		  Seg7_Print(8);
+	  	  }
+	  else if (data1 == '9') {
+	  		  Seg7_Print(9);
+	  	  }
 	  else {
-		  GPIOC->BSRR |= (1<<30);
-		  GPIOC->BSRR |= (1<<31);
+		  UART1_SendString ("khongco\n");
 	  }
+
+
+
+
+
 
 
 
@@ -283,6 +358,22 @@ static void MX_GPIO_Init(void)
   	while(!(USART2->SR&(1<<5))); // wait for RXNE bit to set
   	temp = USART2->DR; // Read the data . This clears the RXNE also
   	return temp;
+  }
+
+  uint8_t UART1_GetChar(void){
+    	uint8_t temp;
+    	while(!(USART1->SR&(1<<5))); // wait for RXNE bit to set
+    	temp = USART1->DR; // Read the data . This clears the RXNE also
+    	return temp;
+    }
+
+  void USART1_sendchar(uint8_t c){
+  	USART1->DR = c; // load data into DR register
+  	while (!(USART1->SR&(1<<6)));// Wait for TC to SET .. This indicates that the data has been transmitted
+  }
+  void UART1_SendString (char *string)
+  {
+  	while(*string) USART1_sendchar(*string++);
   }
 
 /* USER CODE END 4 */
